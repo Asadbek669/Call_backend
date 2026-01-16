@@ -3,10 +3,10 @@ from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
-# index.html va CSS/JS ni xizmat qilish
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+# Frontend papkani static fayllar sifatida xizmat qilish
+app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")
 
-# WebSocket clients
+# WebSocket clientlari
 clients = []
 
 @app.websocket("/ws")
@@ -22,17 +22,21 @@ async def websocket_endpoint(ws: WebSocket):
     try:
         while True:
             data = await ws.receive_json()
+
+            # Call tugmasi bosilganda
             if data["type"] == "call":
-                # barcha boshqa clientlarga call boshlandi deb yuborish
                 for c in clients:
                     if c != ws:
                         await c.send_json({"type": "call_started"})
+
+            # WebRTC signaling
             if data["type"] == "signal":
-                # WebRTC signaling uchun peerga yuborish
                 for c in clients:
                     if c != ws:
                         await c.send_json({"type": "signal", "data": data["data"]})
+
     except WebSocketDisconnect:
         clients.remove(ws)
+        # offline xabar
         for c in clients:
             await c.send_json({"type": "peer_offline"})
