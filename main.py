@@ -1,12 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
-# Frontend papkani static fayllar sifatida xizmat qilish
-app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")
-
-# WebSocket clientlari
 clients = []
 
 @app.websocket("/ws")
@@ -29,7 +24,7 @@ async def websocket_endpoint(ws: WebSocket):
                     if c != ws:
                         await c.send_json({"type": "call_started"})
 
-            # WebRTC signaling
+            # Audio signaling
             if data["type"] == "signal":
                 for c in clients:
                     if c != ws:
@@ -37,6 +32,5 @@ async def websocket_endpoint(ws: WebSocket):
 
     except WebSocketDisconnect:
         clients.remove(ws)
-        # offline xabar
         for c in clients:
-            await c.send_json({"type": "peer_offline"})
+            await c.send_json({"type": "peer_offline"}) 
