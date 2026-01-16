@@ -9,7 +9,7 @@ async def websocket_endpoint(ws: WebSocket):
     await ws.accept()
     clients.append(ws)
 
-    # yangi client online deb xabar
+    # yangi client online xabari
     for c in clients:
         if c != ws:
             await c.send_json({"type": "peer_online"})
@@ -18,13 +18,13 @@ async def websocket_endpoint(ws: WebSocket):
         while True:
             data = await ws.receive_json()
 
-            # Call tugmasi bosilganda
+            # Qo‘ng‘iroq bosildi
             if data["type"] == "call":
                 for c in clients:
                     if c != ws:
                         await c.send_json({"type": "call_started"})
 
-            # Audio signaling
+            # WebRTC signaling
             if data["type"] == "signal":
                 for c in clients:
                     if c != ws:
@@ -33,4 +33,4 @@ async def websocket_endpoint(ws: WebSocket):
     except WebSocketDisconnect:
         clients.remove(ws)
         for c in clients:
-            await c.send_json({"type": "peer_offline"}) 
+            await c.send_json({"type": "peer_offline"})
